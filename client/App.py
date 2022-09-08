@@ -1,10 +1,59 @@
-import tkinter as tk
-class App(tk.Tk):
-    def __init__(self):
-        super().__init__()
+#App.py is the View of MVC
+import sys
+from controller.connector import Connector
         
-        self.title("Simple Expense Manager")
+connector = Connector("http://127.0.0.1:5000")
+
+print('\nEnter ctrl+C to close the program')
+
+while True:
+    try:
+        option = int(input('1: Save Income Amount\n2: Save Expense Amount\n3: Get Balance Amount\nChoose an option with integer(1/2/3): '))
+    except ValueError:
+        print('Only Integer values are permitted\n')
+        continue
+    except KeyboardInterrupt:
+        sys.exit('\nExiting the program...\n')
+    except Exception as e:
+        print(str(e))
+        continue
+    else:
+        if option==1:
+            try:
+                amount = float(input("Enter valid transaction amount: "))
+            except ValueError:
+                print("Enter a valid amount.")
+            except KeyboardInterrupt:
+                sys.exit('\nExiting the program...\n')
+            except Exception as e:
+                print(str(e))
+                continue
+            else:
+                type='income'
+                
+        elif option==2:
+            try:
+                amount = float(input("Enter valid transaction amount: "))
+            except ValueError:
+                print("Enter a valid amount.")
+            except KeyboardInterrupt:
+                sys.exit('\nExiting the program...\n')
+            except Exception as e:
+                print(str(e))
+                continue
+            else:
+                type='expense'
+                
+        elif option==3:
+            print('Balance amount: RS.'+connector.getBalance()+'\n')
+            continue
         
-if __name__ == "__main__":
-    app = App()
-    app.mainloop()
+        else:
+            print('Choose a valid option\n')
+            
+        if type=='income' or type=='expense':
+            res_code = connector.saveExpense(amount, type)
+            if(res_code == 200):
+                print("Transaction successfully saved.\n")
+            else:
+                print("Transaction failed.\n")

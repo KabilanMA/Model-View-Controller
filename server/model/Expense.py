@@ -1,23 +1,16 @@
-from sqlalchemy import MetaData, Column, Integer, Float
-from sqlalchemy.ext.declarative import declarative_base
+from .DBModel import DBModel
 
-metadata = MetaData()
-Base = declarative_base(metadata=metadata)
-
-class Expense(Base):
-    __tablename__ = 'expense'
+class Expense:
     
-    trans_id = Column(Integer, primary_key=True)
-    income = Column(Float, nullable=False, default=0)
-    
-    def __init__(self):
-        pass
-    
-    def __repr__(self):
-        return 'Transaction %r' % self.trans_id
-    
+    def __init__(self, sqldb, amount, code):
+        self.amount = amount*code
+        self.sqldb = sqldb
+        
     def __str__(self):
-        return 'Transaction %r' % self.trans_id
+        return ('Expense transaction' if self.amount<0 else 'Income transaction')
     
-    def check(self):
-        return "Success"
+    def save(self):
+        model = DBModel(income=self.amount)
+        self.sqldb.session.add(model)
+        self.sqldb.session.commit()  
+        

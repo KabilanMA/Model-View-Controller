@@ -3,42 +3,13 @@
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
-# from model.Expense import Expense
-# from model.flaskdb import db
-
+from model.Expense import Expense
+from model.Balance import Balance
+from model.flaskdb import db
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database/expense_manager.db'
-# db.init_app(app)
-db = SQLAlchemy(app)
-
-#Model of MVC
-class DBModel(db.Model):
-    
-    __tablename__ = 'expense'
-    trans_id = db.Column(db.Integer, primary_key=True)
-    income = db.Column(db.Float, nullable=True, default=0)
-    
-    def __repr__(self):
-        return 'Transaction %r' % self.trans_id
-    
-    def __str__(self):
-        return 'Transaction %r' % self.trans_id
-
-#Model of MVC 
-class Expense:
-    
-    def __init__(self, sqldb, amount, code):
-        self.amount = amount*code
-        self.sqldb = sqldb
-        
-    def __str__(self):
-        return ('Expense transaction' if self.amount<0 else 'Income transaction')
-    
-    def save(self):
-        model = DBModel(income=self.amount)
-        self.sqldb.session.add(model)
-        self.sqldb.session.commit()
+db.init_app(app)
 
 
 
@@ -50,7 +21,7 @@ def income():
         try:
             amount = float(amount)
             if amount<0:
-                raise ValueError('amount must be positive')
+                raise ValueError('Amount must be positive')
         except Exception as e:
             return str(e), 400
         else:
@@ -81,12 +52,12 @@ def expense():
 def balance():
     if request.method == 'POST' or 'GET':
         
-        total_balance = DBModel.query.with_entities(func.sum(DBModel.income).label('balance')).first().balance
+        balance = Balance()
         
-        return '%.2f'%total_balance
+        return balance.getBalance(db)
     
     
 if __name__ == "__main__":
-    db.create_all()
     app.run(debug=True)
+    db.create_all()
     
