@@ -12,8 +12,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database/expense_manager.db'
 # db.init_app(app)
 db = SQLAlchemy(app)
 
+#Model of MVC
+class DBModel(db.Model):
     
-class Expense(db.Model):
+    __tablename__ = 'expense'
     trans_id = db.Column(db.Integer, primary_key=True)
     income = db.Column(db.Float, nullable=True, default=0)
     
@@ -23,7 +25,24 @@ class Expense(db.Model):
     def __str__(self):
         return 'Transaction %r' % self.trans_id
 
+#Model of MVC 
+class Expense:
+    
+    def __init__(self, sqldb, amount, code):
+        self.amount = amount*code
+        self.sqldb = sqldb
+        
+    def __str__(self):
+        return ('Expense transaction' if self.amount<0 else 'Income transaction')
+    
+    def save(self):
+        model = DBModel(income=self.amount)
+        self.sqldb.session.add(model)
+        self.sqldb.session.commit()
 
+
+
+#controller of MVC
 @app.route('/income', methods=['POST'])
 def income():
     if request.method == 'POST':
@@ -35,10 +54,9 @@ def income():
         except Exception as e:
             return str(e), 400
         else:
-            trans = Expense(income=amount)
-            db.session.add(trans)
-            db.session.commit()
-        return str(trans)
+            expense = Expense(db, amount, 1)
+            expense.save()
+        return str(expense)
     else:
         return "Not allowed method",405
     
@@ -53,11 +71,9 @@ def expense():
         except Exception as e:
             return str(e), 400
         else:
-            amount = amount*(-1)
-            trans = Expense(income=amount)
-            db.session.add(trans)
-            db.session.commit()
-            return str(trans)
+            expense = Expense(db, amount, -1)
+            expense.save()
+            return str(expense)
     else:
         return "Not allowed method",405
 
@@ -65,7 +81,7 @@ def expense():
 def balance():
     if request.method == 'POST' or 'GET':
         
-        total_balance = Expense.query.with_entities(func.sum(Expense.income).label('balance')).first().balance
+        total_balance = DBModel.query.with_entities(func.sum(DBModel.income).label('balance')).first().balance
         
         return '%.2f'%total_balance
     
