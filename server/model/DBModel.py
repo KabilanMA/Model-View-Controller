@@ -7,6 +7,7 @@ Base = declarative_base(metadata=metadata)
 class DBModel(Base):
     
     __tablename__ = 'expense'
+    __bind_key__ = 'expense'
     trans_id = Column(Integer, primary_key=True)
     income = Column(Float, nullable=True, default=0)
     

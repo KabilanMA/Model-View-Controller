@@ -36,4 +36,4 @@ class Connector:
             if the status_code is 405 then the request method is not allowed. 
             if the status_code is 200 then the transaction is success.
             """
-            return response.status_code
+            return response

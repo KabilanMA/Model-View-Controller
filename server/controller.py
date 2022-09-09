@@ -25,6 +25,7 @@ def income():
         except Exception as e:
             return str(e), 400
         else:
+            db.create_all()
             expense = Expense(db, amount, 1)
             expense.save()
         return str(expense)
@@ -42,6 +43,7 @@ def expense():
         except Exception as e:
             return str(e), 400
         else:
+            db.create_all()
             expense = Expense(db, amount, -1)
             expense.save()
             return str(expense)

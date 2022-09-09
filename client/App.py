@@ -45,15 +45,15 @@ while True:
                 type='expense'
                 
         elif option==3:
-            print('Balance amount: RS.'+connector.getBalance()+'\n')
+            print('\nBalance amount: RS.'+connector.getBalance()+'\n')
             continue
         
         else:
             print('Choose a valid option\n')
             
         if type=='income' or type=='expense':
-            res_code = connector.saveExpense(amount, type)
-            if(res_code == 200):
-                print("Transaction successfully saved.\n")
+            res = connector.saveExpense(amount, type)
+            if(res.status_code == 200):
+                print("Transaction "+str(res.text)+ " is successfully saved.\n")
             else:
                 print("Transaction failed.\n")
