@@ -81,6 +81,12 @@ class TestClass(unittest.TestCase):
         assert response.status_code == 200
 #============
 
+    def test_balance123(self):
+        balance = self.connector.getBalance()
+        response = self.client.get('/balance', follow_redirects=True)
+        self.assertEqual(balance,response)
+
+
     def test_income(self):
         with patch('connector.requests.post') as mocked_post:
             print("=============================")
