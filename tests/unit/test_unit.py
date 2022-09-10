@@ -1,32 +1,34 @@
+
 import sys, os
 from urllib import response
 
+ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..','..'))
+sys.path.insert(0, os.path.join(ROOT_DIR, 'client/controller'))
+sys.path.append(os.path.join(ROOT_DIR, 'server/model'))
+sys.path.append(os.path.join(ROOT_DIR, 'server'))
+
 from flask import current_app,Flask
 
-sys.path.insert(0, os.path.join(sys.path[0],'..','..','client','controller'))
 from connector import Connector
-
-# import controller
 
 from unittest.mock import patch
 
 import unittest
+
 class TestClass(unittest.TestCase):
+
 
     def setUp(self):
         print('Setting Up...')
         self.connector = Connector("http://127.0.0.1:5000")
         self.connector.dropAllData()
-        # self.controller = controller()
-        # self.balance = Balance(db)
-        # self.tester = self.controller.test_client(self)
 
     def tearDown(self):
         print('Tearing Down...\n')
         self.connector.dropAllData()
         self.connector = None
         pass
-
+    
     """Check if the saveExpense() function of the connector works and URL of the server also works for income"""
     def test_income(self):
         with patch('connector.requests.post') as mocked_post:
