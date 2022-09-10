@@ -8,13 +8,24 @@ from urllib import response
 sys.path.insert(0, '/home/vinojith/Desktop/myproject/Model-View-Controller/client/controller')
 sys.path.append('/home/vinojith/Desktop/myproject/Model-View-Controller/server/model')
 sys.path.append('/home/vinojith/Desktop/myproject/Model-View-Controller/server')
-
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from flask import current_app,Flask
-# from Balance import Balance
-# from DBModel import DBModel
-# from Expense import Expense
-# from flaskdb import db
+from Balance import Balance
+from DBModel import DBModel
+from Expense import Expense
+from flaskdb import db
 from connector import Connector
+
+
+from unittest.mock import MagicMock, patch,Mock
+from requests.models import Response
+# from client.controller.connector import Connector
+import pytest
+from controller import create_app
+# from server.model.Expense import Expense
+# from server.model.flaskdb import db
+
 
 # import controller
 
@@ -34,7 +45,11 @@ class TestClass(unittest.TestCase):
     def setUp(self):
         print('SetUP')
         self.connector = Connector("http://127.0.0.1:5000")
-        # self.controller = controller()
+        self.app = create_app()
+        self.appctx = self.app.app_context()
+        self.appctx.push()
+        db.create_all()
+        self.client = self.app.test_client()
         # self.balance = Balance(db)
         # self.tester = self.controller.test_client(self)
 
@@ -43,14 +58,28 @@ class TestClass(unittest.TestCase):
     def tearDown(self):
         print('\nTearDown......\n')
         self.connector = None
+        self.appctx.pop()
+        self.app = None
+        self.appctx = None
+        self.client = None
         pass
 
-    # def test_app(self):
-    #     print("Hi print test is running")
-    #     response = self.tester.get('/balance')
-    #     code = response.status_code
-    #     self.assertEqual(code,200)
+    def test_app(self):
+        assert self.app is not None
+        assert current_app == self.app
 
+
+#==================
+    def test_income12(self):
+        response = self.client.post('/income',json={'amount':100}, follow_redirects=True)
+        assert response.status_code == 200
+#============
+
+#==================
+    def test_Expense12(self):
+        response = self.client.post('/expense',json={'amount':0}, follow_redirects=True)
+        assert response.status_code == 200
+#============
 
     def test_income(self):
         with patch('connector.requests.post') as mocked_post:
@@ -147,6 +176,33 @@ class TestClass(unittest.TestCase):
     #    name = self.balance.__str__()
     #    print(name)
     #    self.assertEqual(1,1)
+
+
+    @pytest.fixture(scope="session")
+    def flask_app():
+            app = create_app()
+            client = app.test_client()
+            ctx = app.test_request_context()
+            ctx.push()
+            yield client
+            ctx.pop()
+
+    @pytest.fixture(scope="session")
+    def app_with_db(flask_app):
+            db.create_all()
+
+            yield flask_app
+
+            db.session.commit()
+            db.drop_all()
+    
+    @pytest.fixture
+    def app_with_data(app_with_db):
+        Expense = Expense(db,3,4)
+        db.session.add(Expense)
+        db.session.commit()
+
+        yield app_with_db
         
 if __name__ == '__main__':
     unittest.main()
