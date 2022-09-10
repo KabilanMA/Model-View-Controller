@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 from model.Expense import Expense
 from model.Balance import Balance
+from model.DropTable import DropTable
 from model.flaskdb import db
 
 app = Flask(__name__)
@@ -58,7 +59,18 @@ def balance():
         
         return balance.getBalance(db)
     
-    
+
+@app.route('/dropdata', methods=['POST'])
+def dropData():
+    if request.method == 'POST':
+        db.create_all()
+        print('Server side drop')
+        drop = DropTable()
+        drop.dropAllData(db)
+        return "OK", 200
+    else:
+        return "Not allowed method",405
+
 if __name__ == "__main__":
     app.run(debug=True)
     db.create_all()

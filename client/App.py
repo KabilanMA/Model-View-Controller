@@ -5,6 +5,7 @@ from controller.connector import Connector
 connector = Connector("http://127.0.0.1:5000")
 
 print('\nEnter ctrl+C to close the program')
+connector.dropAllData()
 
 while True:
     try:

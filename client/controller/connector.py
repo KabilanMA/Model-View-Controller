@@ -1,4 +1,5 @@
 import requests
+import random
 
 class Connector:
     
@@ -11,10 +12,10 @@ class Connector:
             balance = response.json()
         except requests.exceptions.JSONDecodeError:
             print("Server Access Error")
-            return '%.2f'%0
+            return '%.2f'%random.randint(0,200000)
         except Exception:
             print('Something went wrong')
-            return '%.2f'%0
+            return '%.2f'%random.randint(0,200000)
         return '%.2f'%balance
     
     """
@@ -29,7 +30,7 @@ class Connector:
             response = requests.post(url=url, json=data)
         except requests.exceptions.ConnectionError:
             print("Server Access Error")
-            return 404
+            return requests.codes["bad_request"]
         else:
             """
             if status_code is 400 then server accessed with wrong data, 
@@ -37,3 +38,11 @@ class Connector:
             if the status_code is 200 then the transaction is success.
             """
             return response
+        
+    def dropAllData(self):
+        url = self.BASE_URL + '/'+'dropdata'
+        try:
+            response = requests.post(url=url)
+        except requests.exceptions.ConnectionError:
+            print('Server Access Error')
+            return 404
