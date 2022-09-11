@@ -1,5 +1,8 @@
+
+import sys
+sys.path.append('/home/vinojith/Desktop/myproject/Model-View-Controller/server/model')
+
+from DBModel import DBModel
 from flask_sqlalchemy import SQLAlchemy
 
-from .DBModel import metadata
-
-db = SQLAlchemy(metadata=metadata)
+db = SQLAlchemy(metadata=DBModel.metadata)
