@@ -2,7 +2,7 @@
 import sys, os
 from urllib import response
 
-ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..','..'))
+ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..','..','pattern_name','MVC'))
 sys.path.insert(0, os.path.join(ROOT_DIR, 'client/controller'))
 sys.path.append(os.path.join(ROOT_DIR, 'server/model'))
 sys.path.append(os.path.join(ROOT_DIR, 'server'))
@@ -118,3 +118,15 @@ class TestClass(unittest.TestCase):
         
 if __name__ == '__main__':
     unittest.main()
+
+
+# def server():
+#     server_root = os.path.realpath(os.path.join(os.path.dirname(__file__), '..','..'))
+#     server_path = os.path.join(ROOT_DIR, 'server')
+#     server_file = server_path + '/controller.py'
+#     exec(open(server_file).read())
+       
+# if __name__ == '__main__':
+#     thread = Thread(target=unittest.main())
+#     thread.start()
+#     # server()

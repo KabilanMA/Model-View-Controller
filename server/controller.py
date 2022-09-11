@@ -1,8 +1,12 @@
 # this is the server class responding to the request.
-
+import os, sys
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
+
+ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath("__file__")), '..', '..', 'server'))
+print(ROOT_DIR)
+sys.path.insert(0, os.path.join(ROOT_DIR))
 from model.Expense import Expense
 from model.Balance import Balance
 from model.DropTable import DropTable
