@@ -1,12 +1,12 @@
-import imp
 import sys, os
+from unittest import mock
 from urllib import response
 
-ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..','..','pattern_name','MVC'))
-sys.path.insert(0, os.path.join(ROOT_DIR, 'client/controller'))
-sys.path.append(os.path.join(ROOT_DIR, 'server/model'))
+ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..','..'))
+sys.path.append(os.path.join(ROOT_DIR, 'client','controller'))
+sys.path.append(os.path.join(ROOT_DIR, 'server','model'))
 sys.path.append(os.path.join(ROOT_DIR, 'server'))
-
+TEST_SERVER_DIR = os.path.join(ROOT_DIR, 'tests', 'unit','test.db')
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 from flask import current_app,Flask
@@ -16,7 +16,7 @@ from Expense import Expense
 from flaskdb import db
 from connector import Connector
 
-
+import unittest
 from unittest.mock import MagicMock, patch,Mock
 from requests.models import Response
 # from client.controller.connector import Connector
@@ -24,32 +24,40 @@ import pytest
 from controller import create_app
 # from server.model.Expense import Expense
 # from server.model.flaskdb import db
-
-
+# print(create_app.app)
 # import controller
 
 from unittest.mock import patch
 
-import unittest
-
+def mocked_requests_post(*args, **kwargs):
+    class MockResponse:
+        def __init__(self, json_data, status_code):
+            self.json_data = json_data
+            self.status_code = status_code
+            
+        def json(self):
+            return self.json_data
+    
+    if args[0] == 'http://127.0.0.1:5000/income':
+        yield MockResponse({'text':'OK'}, 200)
+    elif args[0] == 'http://127.0.0.1:5000/expense':
+        yield MockResponse({'text':'OK'}, 200)
+    else:
+        yield MockResponse({'text':'Bad Request'}, 400)
 class TestClass(unittest.TestCase):
 
-
     def setUp(self):
-        print('Setting Up...')
         self.connector = Connector("http://127.0.0.1:5000")
         self.app = create_app()
+        self.app.config['TESTING'] = True
+        self.app.config['WTF_CSRF_ENABLED'] = False
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + TEST_SERVER_DIR
         self.appctx = self.app.app_context()
         self.appctx.push()
         db.create_all()
         self.client = self.app.test_client()
-        # self.balance = Balance(db)
-        # self.tester = self.controller.test_client(self)
-
-
 
     def tearDown(self):
-        print('Tearing Down...\n')
         self.connector = None
         self.appctx.pop()
         self.app = None
@@ -58,120 +66,113 @@ class TestClass(unittest.TestCase):
         pass
 
     def test_app(self):
+        print("============================")
+        print("Testing App Initialization")
         assert self.app is not None
         assert current_app == self.app
+        print("Test Success ✅")
 
-
-#==================
     def test_income12(self):
+        print("============================")
+        print("Testing income post request URL")
         response = self.client.post('/income',json={'amount':100}, follow_redirects=True)
-        assert response.status_code == 200
-#============
+        self.assertEqual(response.status_code, 200)
+        print("Test Success ✅")
 
-#==================
     def test_Expense12(self):
+        print("============================")
+        print("Testing expense post request URL")
         response = self.client.post('/expense',json={'amount':0}, follow_redirects=True)
-        assert response.status_code == 200
-#============
+        self.assertEqual(response.status_code, 200)
+        print("Test Success ✅")
 
     def test_balance123(self):
-        balance = self.connector.getBalance()
+        print("============================")
+        print("Testing balance post request URL")
         response = self.client.get('/balance', follow_redirects=True)
-        # self.assertEqual(balance,response)
-
-
-    def test_income(self):
-        with patch('connector.requests.post') as mocked_post:
-            print("=============================")
-            print("running income URL test")
-            a= "8237482394"
-            print(int(a))
-            balance = float(self.connector.getBalance())
-            print(balance)
-            amount = 100
-            print(amount)
-            total = float(balance)+ float(amount)  
-            print(total)
-            response = self.connector.saveExpense(amount, 'income')
-            mocked_post.assert_called_with(url='http://127.0.0.1:5000/income',json={'amount':100})
-            print("Income URL Test Success")
-            print("=============================")
-
-    """Check if the getBalance() function of the connector works and URL of the server also works"""
-    def test_balance(self):
-        print("=============================")
-        print("running balance URL test")
-        with patch('connector.requests.get') as mocked_get:
-            balance1 = self.connector.getBalance()
-            mocked_get.assert_called_with('http://127.0.0.1:5000/balance')
-            print("Balance URL Test Success")
-        print("=============================")
-
-    """Check if the saveExpense() function of the connector works and URL of the server also works for expense"""
-    def test_expense(self):
-        print("=============================")
-        with patch('connector.requests.post') as mocked_post:
-            print("running expence URL test")
-            amount = 100
-            expense = 50
-            response3 = self.connector.saveExpense(amount, 'income')
-            response2 = self.connector.saveExpense(expense, 'expense')
-            mocked_post.assert_called_with(url='http://127.0.0.1:5000/expense',json={'amount':50})
-            print("Expense URL Test Success")
-        print("=============================")
-
-    """Check if the getBalance() function of the connector works properly for income. It depends on the saveExpense() function of the connector"""
-    def test_income_two(self):
-        print("=============================")
-        print("running income test2")
-        balance = float(self.connector.getBalance())
-        print(balance)
-        amount = 100
-        print(amount)
-        total = float(balance)+ float(amount)  
-        print(total)
-        response = self.connector.saveExpense(amount, 'income')
-        response1 = float(self.connector.getBalance())
-        print(response1)
-        self.assertEqual(total,response1)
-        print("Income Test Success")
-        print("=============================") 
-
-    """Check if the getBalance() function of the connector works properly. It depends on the saveExpense() function of the connector"""
-    def test_balance_two(self):
-        print("=============================")
-        print("running balance test")
-        balance = float(self.connector.getBalance())
-        response3 = self.connector.saveExpense(100, 'income')
-        balance2 = float(self.connector.getBalance()) - 100
-        print(balance2, balance)
-        self.assertEqual(balance,balance2)
-        print("Balance Test Success")
-        print("=============================")
-
-    """Check if the saveExpense() function of the connector works properly for expense. it depends on getBalance() function of the connector"""
-    def test_expense_two(self):
-        print("=============================")
+        self.assertEqual(response.status_code, 200)
+        print("Test Success ✅")
         
-        print("running expence test")
-        balance = float(self.connector.getBalance())
+    def test_income(self):
+        print("============================")
+        print("Testing save income")
+        pre_balance = float((self.client.get('/balance', follow_redirects=True)).text)
         amount = 100
-        expense = 50
-        total = balance+amount-expense
-        response3 = self.connector.saveExpense(amount, 'income')
-        response2 = self.connector.saveExpense(expense, 'expense')
-        response1 = float(self.connector.getBalance())
-        print(response1)
-        self.assertEqual(total,response1)
-        print("Expense Test Success")
-        print("=============================")
+        local_balance = float(pre_balance)+ float(amount)
+        res1 = self.client.post('/income',json={'amount':amount}, follow_redirects=True)
+        self.assertEqual(res1.status_code, 200)
+        res2 = self.client.get('/balance', follow_redirects=True)
+        self.assertEqual(res2.status_code, 200)
+        memory_balance = float(res2.text)
+        self.assertEqual(local_balance, memory_balance)
+        print("Test Success ✅") 
 
-    
-    # def test_balance(self):
-    #    name = self.balance.__str__()
-    #    print(name)
-    #    self.assertEqual(1,1)
+    def test_balance(self):
+        print("============================")
+        print("Testing balance query")
+        pre_balance = float((self.client.get('/balance', follow_redirects=True)).text)
+        amount = 100
+        local_balance = float(pre_balance)+ float(amount)
+        res1 = self.client.post('/income',json={'amount':amount}, follow_redirects=True)
+        self.assertEqual(res1.status_code, 200)
+        res2 = self.client.get('/balance', follow_redirects=True)
+        self.assertEqual(res2.status_code, 200)
+        memory_balance = float(res2.text)
+        self.assertEqual(local_balance, memory_balance)
+        print("Test Success ✅")
 
+    def test_expense(self):
+        print("============================")
+        print("Testing save expense")
+        pre_balance = float((self.client.get('/balance', follow_redirects=True)).text)
+        amount = 100
+        local_balance = float(pre_balance)- float(amount)
+        res1 = self.client.post('/expense',json={'amount':amount}, follow_redirects=True)
+        self.assertEqual(res1.status_code, 200)
+        res2 = self.client.get('/balance', follow_redirects=True)
+        self.assertEqual(res2.status_code, 200)
+        memory_balance = float(res2.text)
+        self.assertEqual(local_balance, memory_balance)
+        print("Test Success ✅")
+
+    def test_income_multiple(self):
+        print("============================")
+        print("Testing saving multiple incomes")
+        pre_balance = float((self.client.get('/balance', follow_redirects=True)).text)
+        amounts = [100, 130, 230, 10, 430, 31032, 123, 2.23, 2.3]
+        amount=0
+        for amt in amounts:
+            res1 = self.client.post('/income',json={'amount':amt}, follow_redirects=True)
+            self.assertEqual(res1.status_code, 200)
+            amount+=amt
+            
+        local_balance = float(pre_balance)+ float(amount)
+        
+        res2 = self.client.get('/balance', follow_redirects=True)
+        self.assertEqual(res2.status_code, 200)
+        memory_balance = float(res2.text)
+        self.assertEqual(local_balance, memory_balance)
+        print("Test Success ✅")
+        res1 = self.client.post('/dropdata', follow_redirects=True)
+
+    def test_expense_multiple(self):
+        print("============================")
+        print("Testing saving multiple expense")
+        pre_balance = float((self.client.get('/balance', follow_redirects=True)).text)
+        amounts = [100, 130, 230, 10, 430, 31032, 123, 2.23, 2.3]
+        amount=0
+        for amt in amounts:
+            res1 = self.client.post('/expense',json={'amount':amt}, follow_redirects=True)
+            self.assertEqual(res1.status_code, 200)
+            amount+=amt
+            
+        local_balance = float(pre_balance)-float(amount)
+        
+        res2 = self.client.get('/balance', follow_redirects=True)
+        self.assertEqual(res2.status_code, 200)
+        memory_balance = float(res2.text)
+        self.assertEqual(local_balance, memory_balance)
+        print("Test Success ✅")
 
     @pytest.fixture(scope="session")
     def flask_app():
@@ -201,15 +202,4 @@ class TestClass(unittest.TestCase):
         
 if __name__ == '__main__':
     unittest.main()
-
-
-# def server():
-#     server_root = os.path.realpath(os.path.join(os.path.dirname(__file__), '..','..'))
-#     server_path = os.path.join(ROOT_DIR, 'server')
-#     server_file = server_path + '/controller.py'
-#     exec(open(server_file).read())
-       
-# if __name__ == '__main__':
-#     thread = Thread(target=unittest.main())
-#     thread.start()
-#     # server()
+    

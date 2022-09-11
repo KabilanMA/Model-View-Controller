@@ -5,7 +5,7 @@ from controller.connector import Connector
 connector = Connector("http://127.0.0.1:5000")
 
 print('\nEnter ctrl+C to close the program')
-connector.dropAllData()
+# connector.dropAllData()
 
 while True:
     try:
@@ -51,6 +51,7 @@ while True:
         
         else:
             print('Choose a valid option\n')
+            type=''
             
         if type=='income' or type=='expense':
             res = connector.saveExpense(amount, type)

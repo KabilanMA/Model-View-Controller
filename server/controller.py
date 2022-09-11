@@ -11,13 +11,11 @@ from model.Balance import Balance
 from model.DropTable import DropTable
 from model.flaskdb import db
 
-# app = Flask(__name__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database/expense_manager.db'
-# db.init_app(app)
 
 def create_app():
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database/expense_manager.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
 
 
@@ -36,7 +34,7 @@ def create_app():
                 db.create_all()
                 expense = Expense(db, amount, 1)
                 expense.save()
-            return str(expense)
+            return "OK",200
         else:
             return "Not allowed method",405
         
@@ -64,7 +62,7 @@ def create_app():
 
             balance = Balance()
 
-            return balance.getBalance(db)
+            return balance.getBalance(db),200
     
 
     @app.route('/dropdata', methods=['POST'])
@@ -77,11 +75,13 @@ def create_app():
             return "OK", 200
         else:
             return "Not allowed method",405
+        
+    return app
 
 if __name__ == "__main__":
     # app.run(debug=True)
     # db.create_all()
     app = create_app()
-    app.run(debug=True)
+    app.run(debug=False)
     db.create_all()
     
