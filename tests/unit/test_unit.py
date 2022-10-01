@@ -7,10 +7,9 @@ sys.path.append(os.path.join(ROOT_DIR, 'client','controller'))
 sys.path.append(os.path.join(ROOT_DIR, 'server','model'))
 sys.path.append(os.path.join(ROOT_DIR, 'server'))
 TEST_SERVER_DIR = os.path.join(ROOT_DIR, 'tests', 'unit','test.db')
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func
-from flask import current_app,Flask
-from Balance import Balance
+
+
+from flask import current_app
 from DBModel import DBModel
 from Expense import Expense
 from flaskdb import db
@@ -19,13 +18,8 @@ from connector import Connector
 import unittest
 from unittest.mock import MagicMock, patch,Mock
 from requests.models import Response
-# from client.controller.connector import Connector
 import pytest
 from controller import create_app
-# from server.model.Expense import Expense
-# from server.model.flaskdb import db
-# print(create_app.app)
-# import controller
 
 from unittest.mock import patch
 
