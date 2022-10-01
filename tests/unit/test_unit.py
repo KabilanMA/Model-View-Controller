@@ -1,6 +1,4 @@
 import sys, os
-from unittest import mock
-from urllib import response
 
 ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..','..'))
 sys.path.append(os.path.join(ROOT_DIR, 'client','controller'))
@@ -14,12 +12,9 @@ from flaskdb import db
 from connector import Connector
 
 import unittest
-from unittest.mock import MagicMock, patch,Mock
-from requests.models import Response
 import pytest
 from controller import create_app
 
-from unittest.mock import patch
 
 def mocked_requests_post(*args, **kwargs):
     class MockResponse:
