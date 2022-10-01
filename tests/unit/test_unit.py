@@ -10,8 +10,6 @@ TEST_SERVER_DIR = os.path.join(ROOT_DIR, 'tests', 'unit','test.db')
 
 
 from flask import current_app
-from DBModel import DBModel
-from Expense import Expense
 from flaskdb import db
 from connector import Connector
 
