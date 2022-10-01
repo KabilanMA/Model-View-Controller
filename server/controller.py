@@ -5,7 +5,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 
 
-sys.path.insert(0, os.path.join(ROOT_DIR))
 from model.Expense import Expense
 from model.Balance import Balance
 from model.DropTable import DropTable
