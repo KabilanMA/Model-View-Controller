@@ -1,4 +1,6 @@
 import sys, os
+from unittest import mock
+from urllib import response
 
 ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..','..'))
 sys.path.append(os.path.join(ROOT_DIR, 'client','controller'))
@@ -6,15 +8,20 @@ sys.path.append(os.path.join(ROOT_DIR, 'server','model'))
 sys.path.append(os.path.join(ROOT_DIR, 'server'))
 TEST_SERVER_DIR = os.path.join(ROOT_DIR, 'tests', 'unit','test.db')
 
-
 from flask import current_app
+from Balance import Balance
+from DBModel import DBModel
+from Expense import Expense
 from flaskdb import db
 from connector import Connector
 
 import unittest
+from unittest.mock import MagicMock, patch,Mock
+from requests.models import Response
 import pytest
 from controller import create_app
 
+from unittest.mock import patch
 
 def mocked_requests_post(*args, **kwargs):
     class MockResponse:
@@ -24,7 +31,7 @@ def mocked_requests_post(*args, **kwargs):
             
         def json(self):
             return self.json_data
-    
+        
     if args[0] == 'http://127.0.0.1:5000/income':
         yield MockResponse({'text':'OK'}, 200)
     elif args[0] == 'http://127.0.0.1:5000/expense':
@@ -178,14 +185,6 @@ class TestClass(unittest.TestCase):
 
             db.session.commit()
             db.drop_all()
-    
-    @pytest.fixture
-    def app_with_data(app_with_db):
-        Expense = Expense(db,3,4)
-        db.session.add(Expense)
-        db.session.commit()
-
-        yield app_with_db
         
 if __name__ == '__main__':
     unittest.main()
